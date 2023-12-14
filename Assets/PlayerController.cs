@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
 {
     Vector2 movementInput;
     Rigidbody2D rb;
+    Animator animator;
     public float moveSpeed = 1f;
     public float collisionOffset = 0.05f;
     public ContactFilter2D movementFilter;
@@ -16,26 +17,29 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb=GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+
     }
 
     private void FixedUpdate() {
-        //try normal movement
+        // If movement input is not 0, try to move
         if(movementInput != Vector2.zero){
-           bool success = TryMove(movementInput);
-//if that fails try x direction
-           if(!success) {
-            success = TryMove(new Vector2(movementInput.x, 0));
-            //if that fails try y direction
-           
+            bool success = TryMove(movementInput);
+
+            if(!success) {
+                success = TryMove(new Vector2(movementInput.x, 0));
+
                 if(!success) {
-            success = TryMove(new Vector2(0, movementInput.y));
-           }
-           }
-           
-            
+                    success = TryMove(new Vector2(0, movementInput.y));
+                }
+            }
+
+            animator.SetBool("isMoving", success);
+        }  else {
+            animator.SetBool("isMoving", false);
         }
     }
-
+    
     private bool TryMove(Vector2 direction) {
         //check for potential collisions
         int count = rb.Cast(
