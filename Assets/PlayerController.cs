@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     Vector2 movementInput;
+    SpriteRenderer spriteRenderer;
     Rigidbody2D rb;
     Animator animator;
     public float moveSpeed = 1f;
@@ -18,7 +19,7 @@ public class PlayerController : MonoBehaviour
     {
         rb=GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void FixedUpdate() {
@@ -28,19 +29,27 @@ public class PlayerController : MonoBehaviour
 
             if(!success) {
                 success = TryMove(new Vector2(movementInput.x, 0));
-
-                if(!success) {
-                    success = TryMove(new Vector2(0, movementInput.y));
-                }
+            }
+            if(!success) {
+                 success = TryMove(new Vector2(0, movementInput.y));
             }
 
             animator.SetBool("isMoving", success);
         }  else {
             animator.SetBool("isMoving", false);
         }
+
+        //Set Direction of sprite to movement direction
+        if(movementInput.x <0) {
+            spriteRenderer.flipX = true;
+        } else if (movementInput.x >0) {
+            spriteRenderer.flipX = false;
+        }
+
     }
     
     private bool TryMove(Vector2 direction) {
+        if(direction != Vector2.zero) {
         //check for potential collisions
         int count = rb.Cast(
                 direction, //X and Y vals between -1 and 1 that represent the direction from the body to look for collisions
@@ -55,6 +64,10 @@ public class PlayerController : MonoBehaviour
             else{
                 return false;
             }
+        }else{
+            return false;
+        }
+        
     }
 
     void OnMove(InputValue movementValue) {
